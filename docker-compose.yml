@@ -1,0 +1,60 @@
+services:
+
+  # ── Ollama ────────────────────────────────────────────────────────────────────
+  # The AI engine. Exposes port 11434 so you can also call it from the host
+  # machine during development (e.g. `ollama pull llama3`).
+  #
+  # First-time setup — pull the model after the stack is running:
+  #   docker exec langusta-ollama ollama pull llama3
+  #
+  # GPU support (optional, requires nvidia-container-toolkit):
+  #   Uncomment the `deploy` block below.
+  ollama:
+    image: ollama/ollama          # official image, updated regularly
+    container_name: langusta-ollama
+    ports:
+      - "11434:11434"             # expose to host so you can run `ollama` CLI against it
+    volumes:
+      - ollama_data:/root/.ollama # persist downloaded models between restarts
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # ── Backend ───────────────────────────────────────────────────────────────────
+  # Express API. Talks to Ollama using the service name "ollama" — inside Docker
+  # containers reach each other by service name, not localhost.
+  backend:
+    build:
+      context: ./backend          # folder that contains the backend Dockerfile
+    container_name: langusta-backend
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434   # "ollama" resolves to the ollama container
+      - OLLAMA_MODEL=llama3
+      - PORT=3001
+    depends_on:
+      - ollama                    # start ollama first (doesn't guarantee it's ready, just ordered)
+    restart: unless-stopped
+
+  # ── Frontend ──────────────────────────────────────────────────────────────────
+  # React app built at image-build time, then served by nginx.
+  # nginx also proxies /api/* to the backend — replacing the Vite dev proxy.
+  frontend:
+    build:
+      context: ./frontend         # folder that contains the frontend Dockerfile
+    container_name: langusta-frontend
+    ports:
+      - "8080:80"                 # the app is available at http://localhost:8080
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+# ── Volumes ───────────────────────────────────────────────────────────────────
+# Named volumes are managed by Docker and survive `docker compose down`.
+# To wipe models and start fresh: `docker volume rm langusta_ollama_data`
+volumes:
+  ollama_data:
