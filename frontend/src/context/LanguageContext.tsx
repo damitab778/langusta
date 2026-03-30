@@ -13,10 +13,39 @@ export type LanguageContextValue = {
 
 export const LanguageContext = createContext<LanguageContextValue | null>(null);
 
+const STORAGE_KEY = 'langusta_lang_settings';
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [uiLang, setUiLang] = useState<UILang>('en');
-  const [learnLang, setLearnLang] = useState('es');
-  const [nativeLang, setNativeLang] = useState('en');
+  const saved = loadSettings();
+
+  const [uiLang, setUiLangState] = useState<UILang>(saved?.uiLang ?? 'en');
+  const [learnLang, setLearnLangState] = useState(saved?.learnLang ?? 'es');
+  const [nativeLang, setNativeLangState] = useState(saved?.nativeLang ?? 'en');
+
+  function persist(next: { uiLang: UILang; learnLang: string; nativeLang: string }) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  }
+
+  const setUiLang = (lang: UILang) => {
+    setUiLangState(lang);
+    persist({ uiLang: lang, learnLang, nativeLang });
+  };
+  const setLearnLang = (lang: string) => {
+    setLearnLangState(lang);
+    persist({ uiLang, learnLang: lang, nativeLang });
+  };
+  const setNativeLang = (lang: string) => {
+    setNativeLangState(lang);
+    persist({ uiLang, learnLang, nativeLang: lang });
+  };
 
   return (
     <LanguageContext.Provider

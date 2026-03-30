@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLang } from '../hooks/useLang';
 import { useGrammarCheck } from '../hooks/useGrammarCheck';
 import type { GrammarResult, Mistake } from '../api/grammar';
@@ -13,7 +13,11 @@ export default function GrammarPage() {
   const { t, learnLang, nativeLang } = useLang();
   const [text, setText] = useState('');
 
-  const { mutate, isPending, data, error } = useGrammarCheck();
+  const { mutate, isPending, streamText, data, error } = useGrammarCheck();
+
+  useEffect(() => {
+    if (data) setText('');
+  }, [data]);
 
   function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -43,6 +47,18 @@ export default function GrammarPage() {
           placeholder={`Write something in ${LANG_NAMES[learnLang] ?? learnLang}…`}
           value={text}
           onChange={e => setText(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              if (text.trim() && !isPending) {
+                mutate({
+                  text,
+                  targetLang: LANG_NAMES[learnLang] ?? learnLang,
+                  nativeLang: LANG_NAMES[nativeLang] ?? nativeLang,
+                });
+              }
+            }
+          }}
           disabled={isPending}
         />
         <button
@@ -60,7 +76,69 @@ export default function GrammarPage() {
         </div>
       )}
 
+      {streamText !== null && (
+        streamText === ''
+          ? <GrammarSkeleton />
+          : <StreamView text={streamText} />
+      )}
+
       {data && <GrammarResultView result={data} />}
+    </div>
+  );
+}
+
+function StreamView({ text }: { text: string }) {
+  const [displayed, setDisplayed] = useState('');
+  const textRef = useRef(text);
+  textRef.current = text;
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setDisplayed(prev => {
+        const full = textRef.current;
+        return prev.length < full.length ? full.slice(0, prev.length + 1) : prev;
+      });
+    }, 12);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="rounded-2xl border-2 border-blue-200 bg-blue-50 p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">✏️ Corrected</p>
+      <p className="text-navy text-sm leading-relaxed">
+        {displayed.split('').map((char, i) => (
+          <span key={i} style={{ animation: 'charIn 0.2s ease-out both' }}>{char}</span>
+        ))}
+        <span className="inline-block w-2 h-4 bg-coral ml-0.5 align-middle" style={{ animation: 'blink 1s step-end infinite' }} />
+      </p>
+    </div>
+  );
+}
+
+function GrammarSkeleton() {
+  return (
+    <div className="rounded-2xl border-2 border-coral/20 bg-white p-5 flex flex-col gap-4">
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-coral animate-pulse">Analyzing</span>
+        <span className="flex gap-1">
+          {[0, 1, 2].map(i => (
+            <span
+              key={i}
+              className="w-1.5 h-1.5 rounded-full bg-coral"
+              style={{ animation: `bounce 1s ease-in-out ${i * 0.15}s infinite` }}
+            />
+          ))}
+        </span>
+      </div>
+      <div className="flex flex-col gap-2">
+        <div className="h-3 rounded-full bg-gray-100 animate-pulse w-full" />
+        <div className="h-3 rounded-full bg-gray-100 animate-pulse w-4/5" />
+        <div className="h-3 rounded-full bg-gray-100 animate-pulse w-3/5" />
+      </div>
+      <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
+        <div className="h-3 rounded-full bg-gray-100 animate-pulse w-2/3" />
+        <div className="h-3 rounded-full bg-gray-100 animate-pulse w-1/2" />
+      </div>
     </div>
   );
 }

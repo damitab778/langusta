@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { generate } from '../services/ollamaClient.js';
+import { generateStream } from '../services/ollamaClient.js';
 import { buildGrammarPrompt } from '../services/promptBuilder.js';
 
 type Mistake = {
@@ -28,17 +28,28 @@ router.post('/check', async (req: Request, res: Response) => {
     return;
   }
 
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  const send = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`);
+
   try {
     const prompt = buildGrammarPrompt(text, targetLang, nativeLang);
-    const raw    = await generate(prompt);
+    let fullText = '';
 
-    console.log('--- RAW ---\n', raw, '\n---');
+    for await (const chunk of generateStream(prompt)) {
+      fullText += chunk;
+      send({ chunk });
+    }
 
-    const start = raw.indexOf('{');
-    const end   = raw.lastIndexOf('}');
+    console.log('--- RAW ---\n', fullText, '\n---');
+
+    const start = fullText.indexOf('{');
+    const end   = fullText.lastIndexOf('}');
     if (start === -1 || end === -1) throw new Error('No JSON object found in response');
 
-    const jsonStr = raw
+    const jsonStr = fullText
       .slice(start, end + 1)
       .replace(/,(\s*[}\]])/g, '$1');
 
@@ -49,11 +60,13 @@ router.post('/check', async (req: Request, res: Response) => {
       mistakes:  (parsed.mistakes ?? []).filter((m) => m.original || m.fixed),
     };
 
-    res.json(result);
+    send({ result });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('[grammar/check] ERROR:', message);
-    res.status(502).json({ error: 'AI service error. Is Ollama running?' });
+    send({ error: 'AI service error. Is Ollama running?' });
+  } finally {
+    res.end();
   }
 });
 
