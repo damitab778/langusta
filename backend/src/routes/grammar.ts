@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { generateStream } from '../services/ollamaClient.js';
+import { generate } from '../services/ollamaClient.js';
 import { buildGrammarPrompt } from '../services/promptBuilder.js';
 
 type Mistake = {
@@ -8,11 +8,46 @@ type Mistake = {
   explanation: string;
 };
 
-type ParsedResponse = {
-  corrected?:      string;
-  corrected_text?: string;
-  mistakes?:       Mistake[];
-};
+
+function splitResponse(fullText: string): { corrected: string; mistakesRaw: string } {
+  // Try exact separator
+  const exact = fullText.indexOf('---MISTAKES---');
+  if (exact !== -1) {
+    return {
+      corrected:   fullText.slice(0, exact).trim(),
+      mistakesRaw: fullText.slice(exact + '---MISTAKES---'.length).trim(),
+    };
+  }
+
+  // Fallback: any line of 3+ dashes (e.g. "---")
+  const dashLine = fullText.match(/\n-{3,}\s*\n/);
+  if (dashLine?.index !== undefined) {
+    return {
+      corrected:   fullText.slice(0, dashLine.index).trim(),
+      mistakesRaw: fullText.slice(dashLine.index + dashLine[0].length).trim(),
+    };
+  }
+
+  // Fallback: inline " --- " (model ignores newlines)
+  const inline = fullText.indexOf(' --- ');
+  if (inline !== -1) {
+    return {
+      corrected:   fullText.slice(0, inline).trim(),
+      mistakesRaw: fullText.slice(inline + 5).trim(),
+    };
+  }
+
+  // Last resort: find where the JSON array starts
+  const jsonStart = fullText.search(/\[[\s\S]*?\{/);
+  if (jsonStart !== -1) {
+    return {
+      corrected:   fullText.slice(0, jsonStart).trim(),
+      mistakesRaw: fullText.slice(jsonStart).trim(),
+    };
+  }
+
+  return { corrected: fullText.trim(), mistakesRaw: '[]' };
+}
 
 const router = Router();
 
@@ -28,45 +63,51 @@ router.post('/check', async (req: Request, res: Response) => {
     return;
   }
 
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-
-  const send = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`);
-
   try {
-    const prompt = buildGrammarPrompt(text, targetLang, nativeLang);
-    let fullText = '';
-
-    for await (const chunk of generateStream(prompt)) {
-      fullText += chunk;
-      send({ chunk });
-    }
+    const prompt   = buildGrammarPrompt(text, targetLang, nativeLang);
+    const fullText = await generate(prompt);
 
     console.log('--- RAW ---\n', fullText, '\n---');
 
-    const start = fullText.indexOf('{');
-    const end   = fullText.lastIndexOf('}');
-    if (start === -1 || end === -1) throw new Error('No JSON object found in response');
+    const { corrected, mistakesRaw } = splitResponse(fullText);
 
-    const jsonStr = fullText
-      .slice(start, end + 1)
-      .replace(/,(\s*[}\]])/g, '$1');
+    let mistakes: Mistake[] = [];
+    try {
+      const clean = mistakesRaw
+        .replace(/^```[a-z]*\n?/i, '').replace(/```$/i, '')
+        .replace(/,(\s*[}\]])/g, '$1');
+      const parsed = JSON.parse(clean);
+      const NO_ERROR_RE = /brak\s+b[łl][^\s]*|no\s+error|no\s+mistake|correct(ly)?|no\s+correction/i;
+      mistakes = Array.isArray(parsed)
+        ? parsed
+            .map((m: Record<string, string>) => ({
+              original:    m.original    ?? m.Original    ?? '',
+              fixed:       m.fixed       ?? m.Fixed       ?? '',
+              explanation: m.explanation ?? m.Explanation ?? Object.values(m)[2] ?? '',
+            }))
+            .filter((m: Mistake) =>
+              m.original &&
+              m.fixed &&
+              m.original.trim().toLowerCase() !== m.fixed.trim().toLowerCase() &&
+              !NO_ERROR_RE.test(m.explanation)
+            )
+        : [];
+    } catch {
+      mistakes = [];
+    }
 
-    const parsed = JSON.parse(jsonStr) as ParsedResponse;
+    let finalCorrected = corrected;
+    for (const m of mistakes) {
+      if (finalCorrected.includes(m.original) && !finalCorrected.includes(m.fixed)) {
+        finalCorrected = finalCorrected.replace(m.original, m.fixed);
+      }
+    }
 
-    const result = {
-      corrected: parsed.corrected ?? parsed.corrected_text ?? '',
-      mistakes:  (parsed.mistakes ?? []).filter((m) => m.original || m.fixed),
-    };
-
-    send({ result });
+    res.json({ corrected: finalCorrected, mistakes });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('[grammar/check] ERROR:', message);
-    send({ error: 'AI service error. Is Ollama running?' });
-  } finally {
-    res.end();
+    res.status(500).json({ error: 'AI service error. Is Ollama running?' });
   }
 });
 
