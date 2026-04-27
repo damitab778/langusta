@@ -65,7 +65,7 @@ router.post('/check', async (req: Request, res: Response) => {
 
   try {
     const prompt   = buildGrammarPrompt(text, targetLang, nativeLang);
-    const fullText = await generate(prompt);
+    const fullText = await generate(prompt, { num_predict: 450, num_ctx: 1024 });
 
     console.log('--- RAW ---\n', fullText, '\n---');
 
