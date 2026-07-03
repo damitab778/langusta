@@ -7,6 +7,7 @@ export function ThemeCard({ theme, index, onSelect }: { theme: Theme; index: num
     <div style={{ animation: `floatUp 0.4s ease-out ${index * 0.1}s both` }}>
       <div style={{ position: 'relative' }}>
         <button
+          data-testid="theme-card"
           onClick={onSelect}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}

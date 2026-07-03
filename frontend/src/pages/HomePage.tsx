@@ -28,6 +28,7 @@ export default function HomePage() {
             <Link
               key={f.to}
               to={f.to}
+              data-testid={`home-feature-card-${f.key}`}
               className={`border-2 rounded-2xl p-6 flex flex-col gap-3 transition-all duration-200 ${f.color} group`}
             >
               <div className="flex items-center gap-3">

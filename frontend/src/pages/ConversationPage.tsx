@@ -147,7 +147,7 @@ export default function ConversationPage() {
               <span className="text-xs font-medium text-gray-500 bg-gray-100 rounded-xl px-3 py-1">
                 {selectedTheme.theme}
               </span>
-              <button onClick={reset} className="text-xs text-gray-400 hover:text-coral transition-colors cursor-pointer">
+              <button data-testid="change-topic" onClick={reset} className="text-xs text-gray-400 hover:text-coral transition-colors cursor-pointer">
                 Change topic
               </button>
             </div>
@@ -155,7 +155,7 @@ export default function ConversationPage() {
         </div>
 
         {error && (
-          <div className="mb-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-red-600 text-sm shrink-0">
+          <div data-testid="conversation-error" className="mb-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-red-600 text-sm shrink-0">
             {error}
           </div>
         )}
@@ -169,6 +169,7 @@ export default function ConversationPage() {
                 {activeBots.map((bot, i) => <ActiveBotCard key={bot.id} bot={bot} index={i} />)}
               </div>
               <button
+                data-testid="reroll-partners"
                 onClick={() => setActiveBots(pickBots())}
                 className="text-xs text-gray-400 hover:text-coral transition-colors cursor-pointer flex items-center gap-1"
               >
@@ -179,7 +180,7 @@ export default function ConversationPage() {
             <div className="w-32 border-t border-gray-200" />
 
             {themesLoading || !themes ? (
-              <div className="flex flex-col items-center gap-5">
+              <div data-testid="themes-loading" className="flex flex-col items-center gap-5">
                 <div className="flex gap-4">
                   {[0, 1, 2].map(i => (
                     <div key={i} className="shimmer w-48 h-28 rounded-2xl" style={{ animationDelay: `${i * 0.15}s` }} />
@@ -196,14 +197,14 @@ export default function ConversationPage() {
                 </div>
               </div>
             ) : (
-              <div className="flex gap-4 flex-wrap justify-center">
+              <div data-testid="themes-list" className="flex gap-4 flex-wrap justify-center">
                 {themes.map((t, i) => (
                   <ThemeCard key={t.theme} theme={t} index={i} onSelect={() => selectTheme(t)} />
                 ))}
               </div>
             )}
 
-            <button onClick={loadThemes} className="text-xs text-gray-400 hover:text-coral transition-colors cursor-pointer">
+            <button data-testid="shuffle-topics" onClick={loadThemes} className="text-xs text-gray-400 hover:text-coral transition-colors cursor-pointer">
               Shuffle topics
             </button>
           </div>
@@ -212,7 +213,7 @@ export default function ConversationPage() {
         {/* Chat */}
         {selectedTheme && (
           <>
-            <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1" style={{ minHeight: 0 }}>
+            <div data-testid="messages-list" className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1" style={{ minHeight: 0 }}>
               <div className="flex-1" />
               {messages.map(msg =>
                 msg.role === 'user'
@@ -226,6 +227,7 @@ export default function ConversationPage() {
             <div className="mt-3 flex gap-2 shrink-0">
               <input
                 type="text"
+                data-testid="conversation-input"
                 className="flex-1 rounded-xl border-2 border-gray-200 px-4 py-2.5 text-sm text-navy focus:outline-none focus:border-coral transition-colors"
                 placeholder={`Write in ${targetLang}…`}
                 value={input}
@@ -234,6 +236,7 @@ export default function ConversationPage() {
                 disabled={isLoading}
               />
               <button
+                data-testid="conversation-send"
                 onClick={handleSend}
                 disabled={isLoading || !input.trim()}
                 className="px-5 py-2.5 rounded-xl bg-coral text-white font-semibold text-sm transition-all hover:bg-coral-dark disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
@@ -250,12 +253,12 @@ export default function ConversationPage() {
         <div className="flex items-center gap-2 mb-3 shrink-0">
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Notes</p>
           {corrections.length > 0 && (
-            <span className="text-xs bg-coral text-white rounded-full px-2 py-0.5 font-semibold">
+            <span data-testid="corrections-count" className="text-xs bg-coral text-white rounded-full px-2 py-0.5 font-semibold">
               {corrections.length}
             </span>
           )}
         </div>
-        <div className="flex-1 overflow-y-auto flex flex-col gap-3" style={{ minHeight: 0 }}>
+        <div data-testid="corrections-list" className="flex-1 overflow-y-auto flex flex-col gap-3" style={{ minHeight: 0 }}>
           {corrections.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-gray-200 p-6 text-center text-gray-300 text-sm">
               Corrections will appear here as you chat

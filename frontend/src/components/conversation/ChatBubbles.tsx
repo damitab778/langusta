@@ -3,7 +3,7 @@ import { getBotById } from '../../data/bots';
 
 export function UserBubble({ text }: { text: string }) {
   return (
-    <div className="flex justify-end" style={{ animation: 'fadeIn 0.2s ease-out both' }}>
+    <div data-testid="chat-bubble-user" className="flex justify-end" style={{ animation: 'fadeIn 0.2s ease-out both' }}>
       <div className="max-w-[70%] bg-coral text-white rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed">
         {text}
       </div>
@@ -14,7 +14,7 @@ export function UserBubble({ text }: { text: string }) {
 export function BotBubble({ text, botName, bots }: { text: string; botName: string; bots: Bot[] }) {
   const bot = bots.find(b => b.name === botName) ?? getBotById('sofia');
   return (
-    <div className="flex items-end gap-2" style={{ animation: 'fadeIn 0.2s ease-out both' }}>
+    <div data-testid="chat-bubble-bot" className="flex items-end gap-2" style={{ animation: 'fadeIn 0.2s ease-out both' }}>
       <div style={{ border: `2px solid ${bot?.color ?? '#ccc'}`, borderRadius: '50%', flexShrink: 0 }}>
         {bot ? <bot.Avatar size={32} /> : <div className="w-8 h-8 rounded-full bg-gray-200" />}
       </div>
@@ -30,7 +30,7 @@ export function BotBubble({ text, botName, bots }: { text: string; botName: stri
 
 export function TypingIndicator({ bots }: { bots: Bot[] }) {
   return (
-    <div className="flex items-end gap-2">
+    <div data-testid="chat-typing-indicator" className="flex items-end gap-2">
       <div className="flex -space-x-2" style={{ flexShrink: 0 }}>
         {bots.map(bot => (
           <div key={bot.id} style={{ border: `2px solid ${bot.color}`, borderRadius: '50%', background: 'white' }}>

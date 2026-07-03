@@ -56,7 +56,7 @@ function HighlightedText({
 export function GrammarResultView({ result, originalText }: { result: GrammarResult; originalText: string }) {
   if (result.mistakes.length === 0) {
     return (
-      <div className="rounded-2xl border-2 border-green-200 bg-green-50 p-5 flex flex-col gap-2">
+      <div data-testid="grammar-result-clean" className="rounded-2xl border-2 border-green-200 bg-green-50 p-5 flex flex-col gap-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-green-500">Looks great!</p>
         <p className="text-green-800 text-sm leading-relaxed">{originalText}</p>
         <p className="text-green-600 text-xs mt-1">Good job! No mistakes found.</p>
@@ -65,8 +65,8 @@ export function GrammarResultView({ result, originalText }: { result: GrammarRes
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="rounded-2xl border-2 border-gray-200 bg-white p-4">
+    <div data-testid="grammar-result" className="flex flex-col gap-4">
+      <div data-testid="grammar-original-text" className="rounded-2xl border-2 border-gray-200 bg-white p-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Original</p>
         <p className="text-navy text-sm leading-relaxed">
           <HighlightedText
@@ -76,7 +76,7 @@ export function GrammarResultView({ result, originalText }: { result: GrammarRes
         </p>
       </div>
 
-      <div className="rounded-2xl border-2 border-blue-200 bg-blue-50 p-4">
+      <div data-testid="grammar-corrected-text" className="rounded-2xl border-2 border-blue-200 bg-blue-50 p-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Corrected</p>
         <p className="text-navy text-sm leading-relaxed">
           <HighlightedText
@@ -100,7 +100,7 @@ export function GrammarResultView({ result, originalText }: { result: GrammarRes
 
 function MistakeCard({ mistake, index }: { mistake: Mistake; index: number }) {
   return (
-    <div className="rounded-2xl border-2 border-gray-100 bg-white p-4 flex flex-col gap-2">
+    <div data-testid="grammar-mistake-card" className="rounded-2xl border-2 border-gray-100 bg-white p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2 text-sm flex-wrap">
         <span className="text-gray-400 font-semibold text-xs w-5">{index}.</span>
         <span className="px-2 py-0.5 rounded-lg bg-red-100 text-red-600 font-mono line-through">{mistake.original}</span>

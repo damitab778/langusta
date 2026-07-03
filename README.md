@@ -97,6 +97,29 @@ Located in `backend/.env` (copy from `backend/.env.example`):
 
 ---
 
+## E2E Testing (Playwright)
+
+End-to-end tests live in `e2e/` and use Playwright with a Page Object Model. They run the
+real frontend and backend, replacing only Ollama with a small fake server that returns
+canned fixture responses — no Ollama install needed to run the suite.
+
+```bash
+cd e2e
+npm ci
+npx playwright install --with-deps chromium
+npm test
+```
+
+`npm run test:ui` opens Playwright's interactive UI mode; `npm run report` opens the last
+HTML report. The suite boots the fake Ollama server, backend, and frontend automatically
+on dedicated ports (4143/3901/4310) — don't run it while your own dev servers occupy those
+ports.
+
+CI runs the suite via `.github/workflows/e2e.yml` on every push/PR to `master`, nightly at
+01:00 UTC, and on manual trigger from the Actions tab.
+
+---
+
 ## Features
 
 | Feature | Status |
