@@ -1,6 +1,6 @@
 import type { Page, Locator } from '@playwright/test';
 
-export type Route = 'grammar' | 'conversation' | 'quiz' | 'story';
+export type Route = 'grammar' | 'conversation' | 'story';
 export type UiLang = 'en' | 'es' | 'pl';
 
 const STORAGE_KEY = 'langusta_lang_settings';

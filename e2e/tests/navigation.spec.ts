@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 import { HomePage } from '../pages/HomePage.js';
 import { GrammarPage } from '../pages/GrammarPage.js';
 import { ConversationPage } from '../pages/ConversationPage.js';
-import { QuizPage } from '../pages/QuizPage.js';
 import { StoryPage } from '../pages/StoryPage.js';
 
 test.describe('navigation', () => {
@@ -20,13 +19,9 @@ test.describe('navigation', () => {
     await expect(page).toHaveURL(/\/conversation$/);
     await expect(new ConversationPage(page).themeCards.first()).toBeVisible();
 
-    await home.navbar.clickNavLink('quiz');
-    await expect(page).toHaveURL(/\/quiz$/);
-    await expect(new QuizPage(page).title).toBeVisible();
-
     await home.navbar.clickNavLink('story');
     await expect(page).toHaveURL(/\/story$/);
-    await expect(new StoryPage(page).title).toBeVisible();
+    await expect(new StoryPage(page).generateButton).toBeVisible();
   });
 
   // Acceptance: clicking a home page feature card navigates to that

@@ -4,17 +4,15 @@ const en: Translations = {
   nav: {
     grammar: 'Grammar',
     conversation: 'Conversation',
-    quiz: 'Quiz',
     story: 'Story Game',
   },
   learnLabel: 'Learn',
   fromLabel: 'from',
   home: {
-    tagline: 'Learn languages with AI. Grammar, conversation, quizzes — all in one place.',
+    tagline: 'Learn languages with AI. Grammar, conversation, and stories — all in one place.',
     features: {
       grammar: { title: 'Grammar Check', desc: 'Paste your text and get instant corrections with clear explanations.' },
       conversation: { title: 'Conversation', desc: 'Chat with an AI native speaker. Practice real dialogue at your pace.' },
-      quiz: { title: 'Quiz', desc: 'Pick a topic and get a custom quiz generated just for you.' },
       story: { title: 'Story Game', desc: 'Read an AI-generated story and test your comprehension with a mini-quiz.' },
     },
     start: 'Start →',
@@ -22,8 +20,34 @@ const en: Translations = {
   pages: {
     grammar: { title: 'Grammar Check', desc: 'Coming soon — paste your text and get AI corrections.' },
     conversation: { title: 'Conversation', desc: 'Coming soon — chat with an AI native speaker.' },
-    quiz: { title: 'Quiz', desc: 'Coming soon — AI-generated quizzes on any topic.' },
-    story: { title: 'Story Game', desc: 'Coming soon — read an AI story, then take a comprehension quiz.' },
+    story: { title: 'Story Game', desc: 'Specify a few details and get an AI story with a comprehension quiz.' },
+  },
+  story: {
+    form: {
+      charactersLabel: 'Characters',
+      charactersPlaceholder: 'e.g. a curious cat and a shy dragon',
+      settingLabel: 'Setting',
+      settingPlaceholder: 'e.g. a floating city above the clouds',
+      topicLabel: 'Topic',
+      topicPlaceholder: 'e.g. making a new friend',
+      generateButton: 'Generate story →',
+      generatingButton: 'Writing your story…',
+    },
+    reading: {
+      takeQuizButton: 'Take the comprehension quiz →',
+      untitled: 'Your story',
+    },
+    quiz: {
+      generatingLabel: 'Preparing your quiz…',
+      submitButton: 'Submit answers',
+    },
+    results: {
+      scoreLabel: 'You scored',
+      yourAnswerLabel: 'Your answer',
+      correctAnswerLabel: 'Correct answer',
+      newStoryButton: 'Start a new story',
+    },
+    error: 'Something went wrong. Is Ollama running?',
   },
   footer: 'AI language learning',
 };

@@ -2,7 +2,6 @@ export type Translations = {
   nav: {
     grammar: string;
     conversation: string;
-    quiz: string;
     story: string;
   };
   learnLabel: string;
@@ -12,7 +11,6 @@ export type Translations = {
     features: {
       grammar: { title: string; desc: string };
       conversation: { title: string; desc: string };
-      quiz: { title: string; desc: string };
       story: { title: string; desc: string };
     };
     start: string;
@@ -20,8 +18,34 @@ export type Translations = {
   pages: {
     grammar: { title: string; desc: string };
     conversation: { title: string; desc: string };
-    quiz: { title: string; desc: string };
     story: { title: string; desc: string };
+  };
+  story: {
+    form: {
+      charactersLabel: string;
+      charactersPlaceholder: string;
+      settingLabel: string;
+      settingPlaceholder: string;
+      topicLabel: string;
+      topicPlaceholder: string;
+      generateButton: string;
+      generatingButton: string;
+    };
+    reading: {
+      takeQuizButton: string;
+      untitled: string;
+    };
+    quiz: {
+      generatingLabel: string;
+      submitButton: string;
+    };
+    results: {
+      scoreLabel: string;
+      yourAnswerLabel: string;
+      correctAnswerLabel: string;
+      newStoryButton: string;
+    };
+    error: string;
   };
   footer: string;
 };

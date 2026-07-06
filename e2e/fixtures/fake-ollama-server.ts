@@ -13,6 +13,11 @@ import {
   CONVERSATION_NO_CORRECTION_RESPONSE,
   CONVERSATION_WITH_CORRECTION_RESPONSE,
 } from './conversation-fixtures.js';
+import {
+  STORY_RESPONSE,
+  STORY_RESPONSE_FOR_QUIZ_ERROR_TEST,
+  STORY_QUIZ_RESPONSE,
+} from './story-fixtures.js';
 
 const PORT = Number(process.env.PORT ?? 4143);
 
@@ -43,6 +48,27 @@ app.post('/api/generate', (req, res) => {
       ? CONVERSATION_WITH_CORRECTION_RESPONSE
       : CONVERSATION_NO_CORRECTION_RESPONSE;
     res.json({ response });
+    return;
+  }
+
+  if (prompt.includes('---STORY---')) {
+    if (prompt.includes('__STORY_FORCE_ERROR__')) {
+      res.status(500).json({ error: 'simulated Ollama failure' });
+      return;
+    }
+    const response = prompt.includes('__FORCE_QUIZ_ERROR__')
+      ? STORY_RESPONSE_FOR_QUIZ_ERROR_TEST
+      : STORY_RESPONSE;
+    res.json({ response });
+    return;
+  }
+
+  if (prompt.includes('correctIndex')) {
+    if (prompt.includes('__FORCE_QUIZ_ERROR__')) {
+      res.status(500).json({ error: 'simulated Ollama failure' });
+      return;
+    }
+    res.json({ response: STORY_QUIZ_RESPONSE });
     return;
   }
 

@@ -17,7 +17,6 @@ export default function Navbar() {
   const navLinks = [
     { to: '/grammar', label: t.nav.grammar },
     { to: '/conversation', label: t.nav.conversation },
-    { to: '/quiz', label: t.nav.quiz },
     { to: '/story', label: t.nav.story },
   ];
 

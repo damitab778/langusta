@@ -95,3 +95,67 @@ Rules (strict):
 - Keys in English: "original","fixed","explanation". "explanation" in ${nativeLang}.
 `.trim();
 }
+
+export function buildStoryPrompt(
+  targetLang: string,
+  nativeLang: string,
+  characters: string,
+  setting: string,
+  topic: string,
+): string {
+  const points = [
+    characters && `Characters: ${characters}`,
+    setting && `Setting: ${setting}`,
+    topic && `Topic: ${topic}`,
+  ].filter(Boolean).join('\n');
+
+  return `
+Write a short story in ${targetLang} for a ${nativeLang}-speaking learner, 120-180 words, simple level-appropriate sentences.
+
+${points || '(No context points given — invent an engaging scenario yourself.)'}
+
+Incorporate any given context points naturally. Reply in this exact format — the story first, then the separator, then a JSON object with a title:
+
+Example:
+Maria walked into the small bakery on a rainy morning. The smell of fresh bread filled the air. She smiled at the baker, an old man named Tomas, and ordered her usual croissant. "Rainy days are perfect for pastries," he said, laughing.
+---STORY---
+{"title":"A Rainy Morning at the Bakery"}
+
+Rules (strict):
+- Story: ${targetLang} only, 120-180 words, no inline title, no markdown, no preamble.
+- Separator exactly: ---STORY---
+- JSON key in English: "title". Title max 8 words, written in ${targetLang}.
+- No code fences, no extra text after the JSON.
+`.trim();
+}
+
+export function buildStoryQuizPrompt(
+  targetLang: string,
+  nativeLang: string,
+  story: string,
+): string {
+  return `
+Based on this ${targetLang} story, write a 4-question multiple-choice comprehension quiz for a ${nativeLang}-speaking learner of ${targetLang}.
+
+Story:
+"""
+${story}
+"""
+
+Return ONLY a JSON array of exactly 4 objects. Each has:
+- "question": the question, in ${targetLang}
+- "options": array of exactly 4 answer strings, in ${targetLang}
+- "correctIndex": 0-based index (number) of the correct option in "options"
+- "explanation": one sentence in ${nativeLang} explaining why that answer is correct, referencing the story
+
+Example:
+[{"question":"Where did Maria go?","options":["To a bakery","To a park","To school","To the beach"],"correctIndex":0,"explanation":"The story says she walked into a small bakery."}]
+
+Rules (strict):
+- Exactly 4 questions, exactly 4 options each, exactly 1 correct option.
+- Questions answerable ONLY from the story text above — no outside knowledge.
+- "correctIndex" is a number (0-3), never a string.
+- JSON keys in English exactly as shown. "explanation" in ${nativeLang}, everything else in ${targetLang}.
+- No markdown, no code fences, no extra text before or after the array.
+`.trim();
+}

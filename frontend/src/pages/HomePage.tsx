@@ -5,7 +5,6 @@ import { useLang } from '../hooks/useLang';
 const featureMeta = [
   { key: 'grammar' as const, to: '/grammar', icon: '✏️', color: 'bg-blue-50 border-blue-200 hover:border-blue-400', badge: 'bg-blue-100 text-blue-700' },
   { key: 'conversation' as const, to: '/conversation', icon: '💬', color: 'bg-green-50 border-green-200 hover:border-green-400', badge: 'bg-green-100 text-green-700' },
-  { key: 'quiz' as const, to: '/quiz', icon: '🧠', color: 'bg-purple-50 border-purple-200 hover:border-purple-400', badge: 'bg-purple-100 text-purple-700' },
   { key: 'story' as const, to: '/story', icon: '📖', color: 'bg-orange-50 border-orange-200 hover:border-orange-400', badge: 'bg-orange-100 text-orange-700' },
 ];
 

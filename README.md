@@ -1,6 +1,6 @@
 # 🦞 Langusta
 
-AI-powered language learning app. Practice grammar, conversation, quizzes, and story comprehension — all running on a local AI model via Ollama.
+AI-powered language learning app. Practice grammar, conversation, and story comprehension — all running on a local AI model via Ollama.
 
 ---
 
@@ -126,8 +126,7 @@ CI runs the suite via `.github/workflows/e2e.yml` on every push/PR to `master`, 
 |---|---|
 | Grammar correction | ✅ Done |
 | Conversation practice | 🔧 In progress |
-| AI-generated quizzes | 🔧 In progress |
-| Story mini-game | 🔧 In progress |
+| Story mini-game | ✅ Done |
 
 ---
 
