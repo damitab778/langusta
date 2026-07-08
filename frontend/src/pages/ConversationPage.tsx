@@ -140,7 +140,7 @@ export default function ConversationPage() {
               <div className="flex -space-x-2">
                 {activeBots.map(bot => (
                   <div key={bot.id} title={bot.name} style={{ border: `2px solid ${bot.color}`, borderRadius: '50%' }}>
-                    <bot.Avatar size={30} />
+                    <BotAvatar bot={bot} size={30} />
                   </div>
                 ))}
               </div>

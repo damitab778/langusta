@@ -1,5 +1,6 @@
 import type { Bot } from '../../data/bots';
 import { getBotById } from '../../data/bots';
+import BotAvatar from '../BotAvatar';
 
 export function UserBubble({ text }: { text: string }) {
   return (
@@ -16,7 +17,7 @@ export function BotBubble({ text, botName, bots }: { text: string; botName: stri
   return (
     <div data-testid="chat-bubble-bot" className="flex items-end gap-2" style={{ animation: 'fadeIn 0.2s ease-out both' }}>
       <div style={{ border: `2px solid ${bot?.color ?? '#ccc'}`, borderRadius: '50%', flexShrink: 0 }}>
-        {bot ? <bot.Avatar size={32} /> : <div className="w-8 h-8 rounded-full bg-gray-200" />}
+        {bot ? <BotAvatar bot={bot} size={32} /> : <div className="w-8 h-8 rounded-full bg-gray-200" />}
       </div>
       <div className="max-w-[70%]">
         <p className="text-xs font-semibold mb-1" style={{ color: bot?.color ?? '#888' }}>{botName}</p>
@@ -34,7 +35,7 @@ export function TypingIndicator({ bots }: { bots: Bot[] }) {
       <div className="flex -space-x-2" style={{ flexShrink: 0 }}>
         {bots.map(bot => (
           <div key={bot.id} style={{ border: `2px solid ${bot.color}`, borderRadius: '50%', background: 'white' }}>
-            <bot.Avatar size={32} />
+            <BotAvatar bot={bot} size={32} />
           </div>
         ))}
       </div>

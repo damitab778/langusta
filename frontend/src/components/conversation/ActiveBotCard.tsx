@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Bot } from '../../data/bots';
+import BotAvatar from '../BotAvatar';
 
 export function ActiveBotCard({ bot, index }: { bot: Bot; index: number }) {
   const [hovered, setHovered] = useState(false);
@@ -17,7 +18,7 @@ export function ActiveBotCard({ bot, index }: { bot: Bot; index: number }) {
             transform: hovered ? 'scale(1.08)' : 'scale(1)',
             transition: 'transform 0.2s, box-shadow 0.2s',
           }}>
-            <bot.Avatar size={58} />
+            <BotAvatar bot={bot} size={58} />
           </div>
 
           {hovered && (

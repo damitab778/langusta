@@ -20,7 +20,7 @@ export default function HomePage() {
       </section>
 
       {/* Feature cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-2xl">
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-4xl">
         {featureMeta.map((f) => {
           const feature = t.home.features[f.key];
           return (
