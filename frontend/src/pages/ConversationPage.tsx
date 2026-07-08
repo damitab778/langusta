@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLang } from '../hooks/useLang';
-import { fetchThemes, sendMessage } from '../api/conversation';
+import { useThemes, useSendMessage } from '../services/conversation';
 import type { Correction, HistoryItem, Theme } from '../api/conversation';
 import { pickBots } from '../data/bots';
 import type { Bot } from '../data/bots';
@@ -8,12 +8,19 @@ import { ThemeCard } from '../components/conversation/ThemeCard';
 import { ActiveBotCard } from '../components/conversation/ActiveBotCard';
 import { UserBubble, BotBubble, TypingIndicator } from '../components/conversation/ChatBubbles';
 import { CorrectionCard } from '../components/conversation/CorrectionCard';
+import BotAvatar from '../components/BotAvatar';
 
 const LANG_NAMES: Record<string, string> = {
   en: 'English',
   es: 'Spanish',
   pl: 'Polish',
 };
+
+const FALLBACK_THEMES: Theme[] = [
+  { theme: 'Travel plans',   description: 'Talk about upcoming trips and destinations.' },
+  { theme: 'Food & cooking', description: 'Discuss favourite dishes and recipes.' },
+  { theme: 'Weekend life',   description: 'Describe how you spend your free time.' },
+];
 
 type ChatMessage = HistoryItem & { id: number };
 
@@ -22,36 +29,26 @@ export default function ConversationPage() {
   const targetLang = LANG_NAMES[learnLang] ?? learnLang;
   const natLang    = LANG_NAMES[nativeLang] ?? nativeLang;
 
-  const [themes, setThemes]               = useState<Theme[] | null>(null);
-  const [themesLoading, setThemesLoading] = useState(false);
+  const themesQuery  = useThemes(targetLang, natLang);
+  const sendMutation = useSendMessage();
+
+  const themes        = themesQuery.data?.themes ?? (themesQuery.isError ? FALLBACK_THEMES : null);
+  const themesLoading = themesQuery.isFetching;
+  const isLoading     = sendMutation.isPending;
+
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
   const [activeBots, setActiveBots]       = useState<Bot[]>(() => pickBots());
   const [messages, setMessages]           = useState<ChatMessage[]>([]);
   const [corrections, setCorrections]     = useState<Correction[]>([]);
   const [input, setInput]                 = useState('');
-  const [isLoading, setIsLoading]         = useState(false);
   const [error, setError]                 = useState<string | null>(null);
   const msgId    = useRef(0);
   const bottomRef = useRef<HTMLDivElement>(null);
-
-  function loadThemes() {
-    setThemesLoading(true);
-    setThemes(null);
-    fetchThemes(targetLang, natLang)
-      .then(r => setThemes(r.themes))
-      .catch(() => setThemes([
-        { theme: 'Travel plans',   description: 'Talk about upcoming trips and destinations.' },
-        { theme: 'Food & cooking', description: 'Discuss favourite dishes and recipes.' },
-        { theme: 'Weekend life',   description: 'Describe how you spend your free time.' },
-      ]))
-      .finally(() => setThemesLoading(false));
-  }
 
   useEffect(() => {
     setSelectedTheme(null);
     setMessages([]);
     setCorrections([]);
-    loadThemes();
   }, [targetLang, natLang]);
 
   useEffect(() => {
@@ -60,10 +57,9 @@ export default function ConversationPage() {
 
   async function selectTheme(theme: Theme) {
     setSelectedTheme(theme);
-    setIsLoading(true);
     setError(null);
     try {
-      const { messages: botMsgs } = await sendMessage({
+      const { messages: botMsgs } = await sendMutation.mutateAsync({
         targetLang, nativeLang: natLang, theme: theme.theme,
         bots: activeBots.map(b => ({ name: b.name, personality: b.personality })),
         history: [],
@@ -73,8 +69,6 @@ export default function ConversationPage() {
     } catch {
       setError('Could not start conversation. Is Ollama running?');
       setSelectedTheme(null);
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -85,7 +79,6 @@ export default function ConversationPage() {
     const userMsg: ChatMessage = { id: msgId.current++, role: 'user', text: userText };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
-    setIsLoading(true);
     setError(null);
     try {
       const history: HistoryItem[] = messages.map(m =>
@@ -93,7 +86,7 @@ export default function ConversationPage() {
           ? { role: 'user', text: m.text }
           : { role: 'bot', botName: m.botName, text: m.text }
       );
-      const { messages: botMsgs, corrections: newCorr } = await sendMessage({
+      const { messages: botMsgs, corrections: newCorr } = await sendMutation.mutateAsync({
         targetLang, nativeLang: natLang, theme: selectedTheme.theme,
         bots: activeBots.map(b => ({ name: b.name, personality: b.personality })),
         history, message: userText,
@@ -104,8 +97,6 @@ export default function ConversationPage() {
       if (newCorr.length) setCorrections(prev => [...prev, ...newCorr]);
     } catch {
       setError('Failed to get a response. Is Ollama running?');
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -204,7 +195,7 @@ export default function ConversationPage() {
               </div>
             )}
 
-            <button data-testid="shuffle-topics" onClick={loadThemes} className="text-xs text-gray-400 hover:text-coral transition-colors cursor-pointer">
+            <button data-testid="shuffle-topics" onClick={() => themesQuery.refetch()} className="text-xs text-gray-400 hover:text-coral transition-colors cursor-pointer">
               Shuffle topics
             </button>
           </div>

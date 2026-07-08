@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLang } from '../hooks/useLang';
-import { generateStory, generateStoryQuiz } from '../api/story';
+import { useGenerateStory, useGenerateStoryQuiz } from '../services/story';
 import type { QuizQuestion } from '../api/story';
 import { StoryForm } from '../components/story/StoryForm';
 import { StorySkeleton } from '../components/story/StorySkeleton';
@@ -31,11 +31,14 @@ export default function StoryPage() {
   const [answers, setAnswers]       = useState<(number | null)[]>([]);
   const [error, setError]           = useState<string | null>(null);
 
+  const generateStoryMutation     = useGenerateStory();
+  const generateStoryQuizMutation = useGenerateStoryQuiz();
+
   async function handleGenerateStory() {
     setPhase('generating-story');
     setError(null);
     try {
-      const result = await generateStory({ targetLang, nativeLang: natLang, characters, setting, topic });
+      const result = await generateStoryMutation.mutateAsync({ targetLang, nativeLang: natLang, characters, setting, topic });
       setStory(result.story);
       setStoryTitle(result.title);
       setPhase('reading');
@@ -49,7 +52,7 @@ export default function StoryPage() {
     setPhase('generating-quiz');
     setError(null);
     try {
-      const result = await generateStoryQuiz({ targetLang, nativeLang: natLang, story });
+      const result = await generateStoryQuizMutation.mutateAsync({ targetLang, nativeLang: natLang, story });
       setQuestions(result.questions);
       setAnswers(new Array(result.questions.length).fill(null));
       setPhase('quiz');

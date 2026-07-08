@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLang } from '../hooks/useLang';
-import { useGrammarCheck } from '../hooks/useGrammarCheck';
+import { useCheckGrammar } from '../services/grammar';
 import { GrammarResultView } from '../components/grammar/GrammarResult';
 import { GrammarSkeleton } from '../components/grammar/GrammarSkeleton';
 
@@ -14,7 +14,7 @@ export default function GrammarPage() {
   const { t, learnLang, nativeLang } = useLang();
   const [text, setText] = useState('');
   const [submittedText, setSubmittedText] = useState('');
-  const { mutate, isPending, data, error } = useGrammarCheck();
+  const { mutate, isPending, data, error } = useCheckGrammar();
 
   useEffect(() => {
     if (data) setText('');
