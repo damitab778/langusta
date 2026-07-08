@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { generate } from '../services/ollamaClient.js';
+import { generate } from '../services/aiClient.js';
 import { buildThemesPrompt, buildConversationPrompt } from '../services/promptBuilder.js';
 
 type HistoryItem = { role: 'user' | 'bot'; botName?: string; text: string };

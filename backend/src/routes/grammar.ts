@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { generate } from '../services/ollamaClient.js';
+import { generate } from '../services/aiClient.js';
 import { buildGrammarPrompt } from '../services/promptBuilder.js';
 
 type Mistake = {

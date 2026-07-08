@@ -110,7 +110,7 @@ export function buildStoryPrompt(
   ].filter(Boolean).join('\n');
 
   return `
-Write a short story in ${targetLang} for a ${nativeLang}-speaking learner, 120-180 words, simple level-appropriate sentences.
+Write a long story in ${targetLang} for a ${nativeLang}-speaking learner, 900-1200 words (about 2 A4 pages), simple level-appropriate sentences, multiple paragraphs.
 
 ${points || '(No context points given — invent an engaging scenario yourself.)'}
 
@@ -118,11 +118,12 @@ Incorporate any given context points naturally. Reply in this exact format — t
 
 Example:
 Maria walked into the small bakery on a rainy morning. The smell of fresh bread filled the air. She smiled at the baker, an old man named Tomas, and ordered her usual croissant. "Rainy days are perfect for pastries," he said, laughing.
+(...story continues for several more paragraphs...)
 ---STORY---
 {"title":"A Rainy Morning at the Bakery"}
 
 Rules (strict):
-- Story: ${targetLang} only, 120-180 words, no inline title, no markdown, no preamble.
+- Story: ${targetLang} only, 900-1200 words, multiple paragraphs, no inline title, no markdown, no preamble.
 - Separator exactly: ---STORY---
 - JSON key in English: "title". Title max 8 words, written in ${targetLang}.
 - No code fences, no extra text after the JSON.

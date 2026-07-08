@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { generate } from '../services/ollamaClient.js';
+import { generate } from '../services/aiClient.js';
 import { buildStoryPrompt, buildStoryQuizPrompt } from '../services/promptBuilder.js';
 
 type QuizQuestion = {
@@ -9,7 +9,7 @@ type QuizQuestion = {
   explanation:  string;
 };
 
-const MAX_STORY_CHARS = 1200;
+const MAX_STORY_CHARS = 8000;
 
 function splitStoryResponse(fullText: string): { story: string; title: string } {
   const SEP = '---STORY---';
@@ -48,7 +48,7 @@ router.post('/generate', async (req: Request, res: Response) => {
 
   try {
     const prompt   = buildStoryPrompt(targetLang, nativeLang, characters ?? '', setting ?? '', topic ?? '');
-    const fullText = await generate(prompt, { num_predict: 500, num_ctx: 1024, temperature: 0.75 });
+    const fullText = await generate(prompt, { num_predict: 2200, num_ctx: 4096, temperature: 0.75 });
 
     const { story, title } = splitStoryResponse(fullText);
     res.json({ story, title });
@@ -73,8 +73,8 @@ router.post('/quiz', async (req: Request, res: Response) => {
   try {
     const clampedStory = story.length > MAX_STORY_CHARS ? story.slice(0, MAX_STORY_CHARS) : story;
     const raw = await generate(buildStoryQuizPrompt(targetLang, nativeLang, clampedStory), {
-      num_predict: 500,
-      num_ctx:     2048,
+      num_predict: 600,
+      num_ctx:     4096,
       temperature: 0.5,
     });
 
